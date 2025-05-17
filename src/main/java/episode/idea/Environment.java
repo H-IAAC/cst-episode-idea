@@ -24,7 +24,11 @@ public class Environment {
     }
 
     public Creature createCreature(double x, double y, double p) throws CommandExecException {
-        return proxy.createCreature(x, y, p);
+        return createCreature(x, y, p, ThingColor.RED);
+    }
+
+    public Creature createCreature(double x, double y, double p, ThingColor color) throws CommandExecException {
+        return proxy.createCreature(x, y, p, color.ordinal());
     }
 
     public boolean initializeEnv(){
@@ -32,21 +36,12 @@ public class Environment {
         isAllWallsCreated &= insertWall(ThingColor.BLUE, 0,0,800,0);
         isAllWallsCreated &= insertWall(ThingColor.BLUE, 0,0,0,300);
         isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,0,800,300);
-        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,300,100,300);
-        isAllWallsCreated &= insertWall(ThingColor.WHITE, 0,300,0,700);
-        isAllWallsCreated &= insertWall(ThingColor.WHITE, 100,300,100,700);
-        isAllWallsCreated &= insertWall(ThingColor.RED, 0,700,0,1000);
-        isAllWallsCreated &= insertWall(ThingColor.RED, 100,700,800,700);
-        isAllWallsCreated &= insertWall(ThingColor.RED, 800,700,800,1000);
-        isAllWallsCreated &= insertWall(ThingColor.RED, 0,1000,800,1000);
+        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,300,0,300);
 
         isAllWallsCreated &= insertWall(ThingColor.GREEN, 375, 10, 425, 20);
         isAllWallsCreated &= insertWall(ThingColor.MAGENTA, 325, 10, 375, 20);
         isAllWallsCreated &= insertWall(ThingColor.YELLOW, 425, 10, 475, 20);
 
-        isAllWallsCreated &= insertWall(ThingColor.GREEN, 375, 980, 425, 990);
-        isAllWallsCreated &= insertWall(ThingColor.MAGENTA, 325, 980, 375, 990);
-        isAllWallsCreated &= insertWall(ThingColor.YELLOW, 425, 980, 475, 990);
         return isAllWallsCreated;
     }
 
@@ -63,8 +58,8 @@ public class Environment {
     //TODO: Put colors in correct order
     public enum ThingColor{
         RED,
-        BLUE,
         GREEN,
+        BLUE,
         YELLOW,
         MAGENTA,
         WHITE

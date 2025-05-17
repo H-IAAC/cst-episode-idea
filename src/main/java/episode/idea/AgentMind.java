@@ -10,6 +10,7 @@ import br.unicamp.cst.core.entities.Mind;
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AgentMind extends Mind {
@@ -31,9 +32,9 @@ public class AgentMind extends Mind {
         registerMemory(vision, "Sensory Memory");
         thingCategories = createMemoryObject("ThingCategories", initializeCategories());
         registerMemory(thingCategories, "Perceptual Memory");
-        walls = createMemoryObject("Walls");
+        walls = createMemoryObject("Walls", new ArrayList<Idea>());
         registerMemory(walls, "Perceptual Memory");
-        actors = createMemoryObject("Actors");
+        actors = createMemoryObject("Actors", new ArrayList<Idea>());
         registerMemory(actors, "Perceptual Memory");
        
         Codelet sensoryCodelet = new SensoryCodelet(agent);
