@@ -6,6 +6,12 @@ plugins {
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven {
+        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+    }
+    maven {
+        url "https://artifacts.camunda.com/artifactory/public/"
+    }
     maven { url 'https://jitpack.io' }
 }
 
@@ -16,6 +22,7 @@ dependencies {
     // This dependency is used by the application.
     implementation 'com.github.CST-Group:cst:1.4.1'
     implementation 'com.github.CST-Group:WS3DProxy:0.0.4'
+    implementation 'com.github.CST-Group:cst-desktop:f21d7ffdc'
 }
 
 application {

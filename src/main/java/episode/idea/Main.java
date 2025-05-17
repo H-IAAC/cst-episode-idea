@@ -2,8 +2,10 @@ package episode.idea;
 
 import episode.idea.Environment.ThingColor;
 
+import episode.idea.utils.IdeaVisualizer;
 import org.jetbrains.annotations.Nullable;
 import ws3dproxy.CommandExecException;
+import ws3dproxy.CommandUtility;
 import ws3dproxy.model.Creature;
 
 import java.util.logging.Logger;
@@ -12,6 +14,7 @@ class Main {
     static Logger logger = Logger.getLogger(Main.class.getName());
 
     static Environment env;
+    static Creature agent = null;
 
     public static void main(String[] args) {
 
@@ -22,6 +25,11 @@ class Main {
         //----Initialize main agent that will observe the scene
         AgentMind mind = initializeAgentMind();
         if (mind == null) return;
+        IdeaVisualizer visualizer = new IdeaVisualizer(mind);
+        //visualizer.addMemoryWatch("Vision");
+        visualizer.addMemoryWatch("Walls");
+        visualizer.addMemoryWatch("Actors");
+        visualizer.setVisible(true);
 
         //----Initialize actors
         Creature actor1 = createActor(100, 200);
@@ -30,7 +38,7 @@ class Main {
         if (actor2 == null) return;
 
         sleepFor(1000);
-        System.out.printf("Moving Actors");
+        System.out.println("Moving Actors");
 
         try {
             for (int i = 0; i<2; i++){
@@ -47,6 +55,11 @@ class Main {
                 actor1.moveto(2, 100, 200);
                 sleepFor(1000);
                 moveAndWaitArrive(actor2, 100, 100);
+
+                //--Refuel actors and main agent so it does not stop moving
+                CommandUtility.sendRefuel(actor1.getIndex());
+                CommandUtility.sendRefuel(actor2.getIndex());
+                CommandUtility.sendRefuel(agent.getIndex());
 
                 sleepFor(500);
             }
@@ -83,7 +96,6 @@ class Main {
 
     @Nullable
     private static AgentMind initializeAgentMind() {
-        Creature agent = null;
         try {
             //                                             3 * PI / 2
             agent = env.createCreature(400, 250, 3*3.14/2.0);
@@ -94,13 +106,12 @@ class Main {
             return null;
         }
 
-        AgentMind mind = new AgentMind(agent);
-        return mind;
+        return new AgentMind(agent);
     }
 
     @Nullable
     private static Environment initializeEnvironment() {
-        Environment env = null;
+        Environment env;
         try {
             env = new Environment(100, 100);
             if (!env.initializeEnv()){

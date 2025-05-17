@@ -34,6 +34,9 @@ public class SensoryCodelet extends Codelet {
         synchronized (vision){
             List<Thing> things = agent.getThingsInVision();
             List<Idea> thingIdeas = new ArrayList<>();
+            for (Thing t : things){
+                System.out.printf("THING - CATEGORY: %d - NAME: %s\n", t.getCategory(),t.getName());
+            }
             IntStream.range(0, things.size())
                     .forEach(i -> thingIdeas.add(
                             new Idea("Thing" + i, things.get(i))

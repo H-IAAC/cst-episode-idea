@@ -28,7 +28,7 @@ public class AgentMind extends Mind {
         Memory actors;
         Memory thingCategories;
 
-        vision = createMemoryObject("Vision");
+        vision = createMemoryObject("Vision", new ArrayList<Thing>());
         registerMemory(vision, "Sensory Memory");
         thingCategories = createMemoryObject("ThingCategories", initializeCategories());
         registerMemory(thingCategories, "Perceptual Memory");
@@ -91,6 +91,7 @@ public class AgentMind extends Mind {
                 Object value = idea.getValue();
                 if (value instanceof Thing) {
                     Thing thing = (Thing) value;
+                    //System.out.printf("TESTING IF ACTOR - CATEGORY: %d - NAME: %s\n", thing.getCategory(), thing.getName());
                     if (thing.getCategory() == 0) return 1.0;
                 }
                 return 0;
