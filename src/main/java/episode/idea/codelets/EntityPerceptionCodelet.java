@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ThingDetector extends Codelet {
+public class EntityPerceptionCodelet extends Codelet {
 
     private Memory vision;
     private final String categoryMemoryName;
@@ -20,7 +20,7 @@ public class ThingDetector extends Codelet {
 
     private Category thingCategoryIdea;
 
-    public ThingDetector(String categoryMemoryName, String thingMemoryOutput) {
+    public EntityPerceptionCodelet(String categoryMemoryName, String thingMemoryOutput) {
         this.categoryMemoryName = categoryMemoryName;
         this.thingMemoryOutput = thingMemoryOutput;
     }

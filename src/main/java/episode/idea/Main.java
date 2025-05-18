@@ -29,6 +29,7 @@ class Main {
         //visualizer.addMemoryWatch("Vision");
         visualizer.addMemoryWatch("Walls");
         visualizer.addMemoryWatch("Actors");
+        visualizer.addMemoryWatch("PerceptionBuffer");
         visualizer.setVisible(true);
 
         //----Initialize actors

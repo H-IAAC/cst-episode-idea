@@ -137,6 +137,13 @@ public class IdeaVisualizer extends JFrame {
                         show.setL(listContent);
                     }
                     setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, 5), Idea.class));
+                } else if (content instanceof LinkedList) {
+                    Idea show = new Idea(memoryName, "");
+                    LinkedList<Idea> listContent = (LinkedList<Idea>) content;
+                    if (!listContent.isEmpty()) {
+                        show.getL().addAll(listContent);
+                    }
+                    setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, 5), Idea.class));
                 } else if (content instanceof Map){
                     Map<String, List<Idea>> internal = (Map<String, List<Idea>>) content;
                     Idea show = new Idea(memoryName, "");

@@ -3,15 +3,17 @@ package episode.idea;
 import br.unicamp.cst.representation.idea.Category;
 import br.unicamp.cst.representation.idea.Idea;
 import episode.idea.codelets.SensoryCodelet;
-import episode.idea.codelets.ThingDetector;
+import episode.idea.codelets.EntityPerceptionCodelet;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.core.entities.Mind;
+import episode.idea.codelets.episodic.SituationSequencerCodelet;
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class AgentMind extends Mind {
 
@@ -27,6 +29,7 @@ public class AgentMind extends Mind {
         Memory walls;
         Memory actors;
         Memory thingCategories;
+        Memory perceptionBuffer;
 
         vision = createMemoryObject("Vision", new ArrayList<Thing>());
         registerMemory(vision, "Sensory Memory");
@@ -36,22 +39,30 @@ public class AgentMind extends Mind {
         registerMemory(walls, "Perceptual Memory");
         actors = createMemoryObject("Actors", new ArrayList<Idea>());
         registerMemory(actors, "Perceptual Memory");
+        perceptionBuffer = createMemoryObject("PerceptionBuffer", new LinkedList<Idea>());
+        registerMemory(perceptionBuffer, "Perceptual Memory");
        
         Codelet sensoryCodelet = new SensoryCodelet(agent);
         sensoryCodelet.addOutput(vision);
         insertCodelet(sensoryCodelet);
        
-        Codelet wallDetector = new ThingDetector("Wall", "Walls");
+        Codelet wallDetector = new EntityPerceptionCodelet("Wall", "Walls");
         wallDetector.addInput(vision);
         wallDetector.addInput(thingCategories);
         wallDetector.addOutput(walls);
         insertCodelet(wallDetector);
 
-        Codelet creatureDetector = new ThingDetector("Creature", "Actors");
+        Codelet creatureDetector = new EntityPerceptionCodelet("Creature", "Actors");
         creatureDetector.addInput(vision);
         creatureDetector.addInput(thingCategories);
         creatureDetector.addOutput(actors);
         insertCodelet(creatureDetector);
+
+        Codelet situationSequencer = new SituationSequencerCodelet();
+        situationSequencer.addInput(walls);
+        situationSequencer.addInput(actors);
+        situationSequencer.addOutput(perceptionBuffer);
+        insertCodelet(situationSequencer);
 
         for (Codelet c : this.getCodeRack().getAllCodelets()) {
             c.setTimeStep(200);
