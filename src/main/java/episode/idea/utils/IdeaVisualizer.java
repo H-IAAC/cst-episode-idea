@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author bruno
@@ -116,36 +117,38 @@ public class IdeaVisualizer extends JFrame {
                 .stream().filter(m -> m.getName().equalsIgnoreCase(memoryName))
                 .findFirst();
         if (selectedMem.isPresent()) {
-            Object content = selectedMem.get().getI();
-            if (selectedMem.get() instanceof MemoryContainer){
-                List<Memory> memorieList = ((MemoryContainer) selectedMem.get()).getAllMemories();
-                Idea allContent = new Idea(memoryName, "");
-                for (Memory mem : memorieList){
-                    allContent.add((Idea) mem.getI());
+            Memory memory = selectedMem.get();
+            synchronized (memory) {
+                Object content = memory.getI();
+                if (selectedMem.get() instanceof MemoryContainer){
+                    List<Memory> memorieList = ((MemoryContainer) selectedMem.get()).getAllMemories();
+                    Idea allContent = new Idea(memoryName, "");
+                    for (Memory mem : memorieList){
+                        allContent.add((Idea) mem.getI());
+                    }
+                    content = allContent;
+                } else if (content instanceof Idea) {
+                    setIdea(new Gson().fromJson(IdeaHelper.csvPrint((Idea) content, memoryLevels.getOrDefault(memoryName,5)), Idea.class));
+                    //setIdea(new Gson().fromJson(IdeaHelper.csvPrint((Idea) content, memoryLevels.getOrDefault(memoryName, 5)), Idea.class));
+                } else if (content instanceof ArrayList) {
+                    Idea show = new Idea(memoryName, "");
+                    ArrayList<Idea> listContent = (ArrayList<Idea>) content;
+                    if (!listContent.isEmpty()) {
+                        show.setL(listContent);
+                    }
+                    setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, 5), Idea.class));
+                } else if (content instanceof Map){
+                    Map<String, List<Idea>> internal = (Map<String, List<Idea>>) content;
+                    Idea show = new Idea(memoryName, "");
+                    for (Map.Entry<String,List<Idea>> entry : internal.entrySet()){
+                        Idea obj = new Idea(entry.getKey(), "", "AbstractObject", 1);
+                        obj.setL(entry.getValue());
+                        show.add(obj);
+                    }
+                    setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, memoryLevels.getOrDefault(memoryName,5)), Idea.class));
+                } else {
+                    Logger.getLogger(IdeaVisualizer.class.getName()).severe(String.format("Visualization for class %s not implemented\n", content.getClass().getName()));
                 }
-                content = allContent;
-            }
-            if (content instanceof Idea) {
-                setIdea(new Gson().fromJson(IdeaHelper.csvPrint((Idea) content, memoryLevels.getOrDefault(memoryName,5)), Idea.class));
-                //setIdea(new Gson().fromJson(IdeaHelper.csvPrint((Idea) content, memoryLevels.getOrDefault(memoryName, 5)), Idea.class));
-            }
-            if (content instanceof ArrayList) {
-                Idea show = new Idea(memoryName, "");
-                ArrayList<Idea> listContent = (ArrayList<Idea>) content;
-                if (listContent.size() != 0) {
-                    show.setL(listContent);
-                }
-                setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, 5), Idea.class));
-            }
-            if (content instanceof Map){
-                Map<String, List<Idea>> internal = (Map<String, List<Idea>>) content;
-                Idea show = new Idea(memoryName, "");
-                for (Map.Entry<String,List<Idea>> entry : internal.entrySet()){
-                    Idea obj = new Idea(entry.getKey(), "", "AbstractObject", 1);
-                    obj.setL(entry.getValue());
-                    show.add(obj);
-                }
-                setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, memoryLevels.getOrDefault(memoryName,5)), Idea.class));
             }
 
         }
@@ -171,7 +174,8 @@ public class IdeaVisualizer extends JFrame {
         }
         System.out.println("Print");
         ideaPanel = new IdeaPanel(idea, false);
-        ideaPanel.updateTree();
+        if (!idea.getL().isEmpty())
+            ideaPanel.updateTree();
         ideaPanel.expandAllNodes();
         jPanel2.removeAll();
         jPanel2.add(ideaPanel);
