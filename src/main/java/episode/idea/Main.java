@@ -25,18 +25,21 @@ class Main {
         //----Initialize main agent that will observe the scene
         AgentMind mind = initializeAgentMind();
         if (mind == null) return;
-        IdeaVisualizer visualizer = new IdeaVisualizer(mind);
-        //visualizer.addMemoryWatch("Vision");
-        visualizer.addMemoryWatch("Walls");
-        visualizer.addMemoryWatch("Actors");
-        visualizer.addMemoryWatch("PerceptionBuffer");
-        visualizer.setVisible(true);
 
         //----Initialize actors
         Creature actor1 = createActor(100, 200);
         if (actor1 == null) return;
         Creature actor2 = createActor(100, 100);
         if (actor2 == null) return;
+
+        IdeaVisualizer visualizer = new IdeaVisualizer(mind);
+        //visualizer.addMemoryWatch("Vision");
+        visualizer.addMemoryWatch("Walls");
+        visualizer.addMemoryWatch("Actors");
+        visualizer.addMemoryWatch("PerceptionBuffer");
+        visualizer.addMemoryWatch("SimpleEpisodes");
+        visualizer.setVisible(true);
+
 
         sleepFor(1000);
         System.out.println("Moving Actors");
@@ -99,7 +102,7 @@ class Main {
     private static AgentMind initializeAgentMind() {
         try {
             //                                             3 * PI / 2
-            agent = env.createCreature(400, 250, 3*3.14/2.0);
+            agent = env.createCreature(400, 450, 3*3.14/2.0);
             agent.start();
         } catch (CommandExecException e) {
             logger.severe("Could not create main agent");

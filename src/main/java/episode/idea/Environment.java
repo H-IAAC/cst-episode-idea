@@ -34,9 +34,9 @@ public class Environment {
     public boolean initializeEnv(){
         boolean isAllWallsCreated = true;
         isAllWallsCreated &= insertWall(ThingColor.BLUE, 0,0,800,0);
-        isAllWallsCreated &= insertWall(ThingColor.BLUE, 0,0,0,300);
-        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,0,800,300);
-        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,300,0,300);
+        isAllWallsCreated &= insertWall(ThingColor.BLUE, 0,0,0,500);
+        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,0,800,500);
+        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,500,0,500);
 
         isAllWallsCreated &= insertWall(ThingColor.GREEN, 375, 10, 425, 20);
         isAllWallsCreated &= insertWall(ThingColor.MAGENTA, 325, 10, 375, 20);
