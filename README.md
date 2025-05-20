@@ -12,20 +12,61 @@ See more projects from the group [here](https://github.com/brgsil/RepoOrganizer)
 ## Repository Structure
 > Lista e descrição das pastas e arquivos importantes na raiz do repositório
 
-- \<pasta>: \<descrição>
+```
+-\src\main\java\episode\idea: Source code for project execution
+-\docker.sh:                  Execution script for docker simulation container
+-\gradlew:                    Java build tool
+```
 
 
-## Dependencies / Requirements
+## 🧩 Requirements
 
-> Descrição do passo-a-passo para instalação de bibliotecas, softwares e demais ferramentas
-> ncessárias para execução do projeto antes de se clonar o repositório, assim como possíveis
-> requesitos mínimos para o projeto (processador, gpu, compilador, etc).
+### Java
 
-## Installation / Usage
+> TODO
+
+### Docker
+
+To run the simulator, Docker Engine must be installed on your system. If you haven't yet installed the Docker Engine, follow the installation instructions below:
+
+#### **Linux**
+
+To run the container, you need to install the Docker Engine. Follow the steps on the official [Docker website](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository).
+
+> ⚠️ Make sure you follow the instructions for installing Docker Engine by apt. Docker Desktop for Linux will not allow you to use the graphical interfaces in the examples.
+
+#### **Windows**
+
+Download the installer and follow the installation steps on the [Docker] website (https://docs.docker.com/desktop/install/windows-install/).
+
+> ⚠️ Make sure that WSL 2 is installed according to the instructions in the [System Requirements](https://docs.docker.com/desktop/install/windows-install/#system-requirements).
+
+For use on Windows, you will also need to install [VcXsrv](https://sourceforge.net/projects/vcxsrv/)
+
+#### **MacOS**
+
+Download the installer for your hardware and follow the installation steps on the [Docker] website(https://docs.docker.com/desktop/install/mac-install/)
+
+For use on Mac you will also need to install [XQuatz](https://www.xquartz.org/)
+
+## 🏃‍♀️ Running the Experiment
 
 > Passo-a-passo para execução do projeto localmente, assim como parâmetros de configuração
 > aceitos (por exemplo, como trocar o caminho para o arquivo de entrada ou saída). No caso de 
 > bibliotecas/API fornecer o link para a documentação do mesmo se disponível.
+
+### **Linux**
+
+Once you have the Docker Engine installed, the Docker container for CoppeliaSim can be executed with the script provided in this repository:
+
+```bash
+./docker.sh
+```
+
+The `docker.sh` script will start the container and initialize CoppeliaSim with XServer and the Java controler application with socket communication for [WS3DProxy](https://github.com/CST-Group/WS3DProxy).
+```shell
+./docker.sh & ./gradlew run
+```
 
 ## Citation
 
