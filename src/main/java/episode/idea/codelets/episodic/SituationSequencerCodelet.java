@@ -39,7 +39,7 @@ public class SituationSequencerCodelet extends Codelet {
         }
         synchronized (perceptionBuffer){
             LinkedList<Idea> buffer = (LinkedList<Idea>) perceptionBuffer.getI();
-            while (buffer.size() >= 20){
+            while (buffer.size() >= 3){
                 buffer.poll();
             }
             buffer.add(currSituation);

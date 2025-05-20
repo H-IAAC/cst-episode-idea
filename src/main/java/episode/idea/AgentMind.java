@@ -7,6 +7,7 @@ import episode.idea.codelets.EntityPerceptionCodelet;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.core.entities.Mind;
+import episode.idea.codelets.episodic.SimpleOEpisodeSegmentation;
 import episode.idea.codelets.episodic.SituationSequencerCodelet;
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
@@ -24,12 +25,14 @@ public class AgentMind extends Mind {
         // Memory Groups Declaration
         createMemoryGroup("Sensory Memory");
         createMemoryGroup("Perceptual Memory");
-       
+        createMemoryGroup("Episodic Buffer");
+
         Memory vision;
         Memory walls;
         Memory actors;
         Memory thingCategories;
         Memory perceptionBuffer;
+        Memory episodes;
 
         vision = createMemoryObject("Vision", new ArrayList<Thing>());
         registerMemory(vision, "Sensory Memory");
@@ -41,6 +44,8 @@ public class AgentMind extends Mind {
         registerMemory(actors, "Perceptual Memory");
         perceptionBuffer = createMemoryObject("PerceptionBuffer", new LinkedList<Idea>());
         registerMemory(perceptionBuffer, "Perceptual Memory");
+        episodes = createMemoryObject("SimpleEpisodes", new ArrayList<Idea>());
+        registerMemory(episodes, "Episodic Buffer");
        
         Codelet sensoryCodelet = new SensoryCodelet(agent);
         sensoryCodelet.addOutput(vision);
@@ -63,6 +68,11 @@ public class AgentMind extends Mind {
         situationSequencer.addInput(actors);
         situationSequencer.addOutput(perceptionBuffer);
         insertCodelet(situationSequencer);
+
+        Codelet simpleOEpisodeSegmentation = new SimpleOEpisodeSegmentation();
+        simpleOEpisodeSegmentation.addInput(perceptionBuffer);
+        simpleOEpisodeSegmentation.addInput(episodes);
+        insertCodelet(simpleOEpisodeSegmentation);
 
         for (Codelet c : this.getCodeRack().getAllCodelets()) {
             c.setTimeStep(200);
