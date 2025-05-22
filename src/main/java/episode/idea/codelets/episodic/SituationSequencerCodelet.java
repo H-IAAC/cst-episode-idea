@@ -43,6 +43,7 @@ public class SituationSequencerCodelet extends Codelet {
                 buffer.poll();
             }
             buffer.add(currSituation);
+            perceptionBuffer.setI(buffer);
         }
     }
 }

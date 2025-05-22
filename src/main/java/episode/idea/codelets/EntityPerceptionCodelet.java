@@ -54,9 +54,9 @@ public class EntityPerceptionCodelet extends Codelet {
         }
     }
 
-    private Idea constructThingIdea(Idea thingCategory) {
-        String name = thingCategory.getName();
-        Thing t = (Thing) thingCategory.getValue();
+    private Idea constructThingIdea(Idea thingSensorIdea) {
+        Thing t = (Thing) thingSensorIdea.getValue();
+        String name = t.getName();
         Idea thingIdea = new Idea(name, thingCategoryIdea, "AbstractObject", 1);
         Idea posIdea = new Idea("Position", null, "Property", 1);
         posIdea.add(new Idea("X", t.getCenterPosition().getX(), "QualityDimension", 1));

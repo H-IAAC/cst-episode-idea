@@ -70,8 +70,9 @@ public class AgentMind extends Mind {
         insertCodelet(situationSequencer);
 
         Codelet simpleOEpisodeSegmentation = new SimpleOEpisodeSegmentation(episodeType);
+        simpleOEpisodeSegmentation.setPublishSubscribe(true);
         simpleOEpisodeSegmentation.addInput(perceptionBuffer);
-        simpleOEpisodeSegmentation.addInput(episodes);
+        simpleOEpisodeSegmentation.addOutput(episodes);
         insertCodelet(simpleOEpisodeSegmentation);
 
         for (Codelet c : this.getCodeRack().getAllCodelets()) {

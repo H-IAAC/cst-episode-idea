@@ -4,11 +4,16 @@ import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.representation.idea.Category;
 import br.unicamp.cst.representation.idea.Idea;
+import episode.idea.utils.IdeaHelper;
 import org.apache.commons.lang.NotImplementedException;
 
 import java.util.*;
 
 public class SimpleOEpisodeSegmentation extends Codelet {
+
+    private static final String INITIAL_SITUATION = "InitialSituation";
+    private static final String INTERMEDIATE_SITUATION = "IntermediateSituation";
+    private static final String FINAL_SITUATION = "FinalSituation";
 
     private Memory perceptionBuffer;
     private Memory oEpisodes;
@@ -31,7 +36,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
     @Override
     public void accessMemoryObjects() {
         perceptionBuffer = getInput("PerceptionBuffer");
-        oEpisodes = getInput("SimpleEpisodes");
+        oEpisodes = getOutput("SimpleEpisodes");
     }
 
     @Override
@@ -48,15 +53,16 @@ public class SimpleOEpisodeSegmentation extends Codelet {
             // Iterate over all episodes
             for (Idea episode : episodesList) {
                 // Check if is not a finished episode
-                boolean isEndedEpisode = episode.get("FinalSituation") != null;
+                boolean isEndedEpisode = episode.get(FINAL_SITUATION) != null;
 
                 if (!isEndedEpisode) {
                     // Get initial situation from episode
-                    Idea initialSituation = episode.get("InitialSituation");
+                    Idea initialSituation = episode.get(INITIAL_SITUATION);
 
                     //TODO: remove
                     assert initialSituation != null;
-                    String trackedObjectName = initialSituation.getL().get(0).getName();
+                    Idea trackedObject = ((LinkedList<Idea>) episode.getL()).getLast().getL().get(0);
+                    String trackedObjectName = trackedObject.getName();
                     trackedObjectNames.add(trackedObjectName);
 
                     synchronized (perceptionBuffer) {
@@ -66,18 +72,21 @@ public class SimpleOEpisodeSegmentation extends Codelet {
 
                         //Check if tracked object is part of situation
                         for (Idea object : situation.getL()) {
-                            if (object.getName().equals(trackedObjectName)) {
-                                //Construct test episode from las 3 situations to check against
+                            if (object.getName().equals(trackedObjectName) && trackedObject.getId() != object.getId()) {
+                                //Construct test episode from last 3 situations to check against
                                 //episode category.
                                 LinkedList<Idea> episodeSituations = (LinkedList<Idea>) episode.getL();
                                 int episodeLen = episodeSituations.size();
-                                Idea mockSituation = new Idea("IntermediateSituation", "");
+                                Idea mockSituation = new Idea(INTERMEDIATE_SITUATION, "");
                                 mockSituation.add(object);
-                                List<Idea> episodeSeq = Arrays.asList(
-                                        episodeSituations.get(episodeLen - 2),
-                                        episodeSituations.get(episodeLen - 1),
-                                        mockSituation
-                                );
+
+                                LinkedList<Idea> episodeSeq = new LinkedList<>();
+                                int buffer_size = (int) episodeCategoryIdea.get("buffer_size").getValue();
+                                for (int i = buffer_size-1; i > 0; i--){
+                                    episodeSeq.add(episodeSituations.get(episodeLen - i));
+                                }
+                                episodeSeq.add(mockSituation);
+
                                 Idea mockEpisode = new Idea("Episode", "");
                                 mockEpisode.setL(episodeSeq);
 
@@ -85,7 +94,8 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                                 if (episodeCategoryIdea.membership(mockEpisode) > 0.5) {
                                     episodeSituations.add(mockSituation);
                                 } else {//TODO: should end episode otherwise?
-                                    episodeSituations.getLast().setName("FinalSituation");
+                                    System.out.println(IdeaHelper.fullPrint(mockEpisode));
+                                    episodeSituations.getLast().setName(FINAL_SITUATION);
                                 }
                             }
                         }
@@ -100,14 +110,14 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                 int nSituations = situationBuffer.size();
                 int requiredBufferSize = (int) episodeCategoryIdea.get("buffer_size").getValue();
                 if (nSituations >= requiredBufferSize) {
-                    for (Idea object : situationBuffer.getFirst().getL()) {
+                    for (Idea object : situationBuffer.getLast().getL()) {
                         // If object is not tracked, start tracking it if is an LinearEpisode
                         String newObject = object.getName();
                         if (!trackedObjectNames.contains(newObject)) {
                             LinkedList<Idea> mockSituations = new LinkedList<>();
-                            addMockSituationForObject(situationBuffer.get(nSituations - requiredBufferSize), newObject, "InitialSituation", mockSituations);
+                            addMockSituationForObject(situationBuffer.get(nSituations - requiredBufferSize), newObject, INITIAL_SITUATION, mockSituations);
                             for (int i = requiredBufferSize-1; i > 0; i--){
-                                addMockSituationForObject(situationBuffer.get(nSituations - i), newObject, "IntermediarySituation", mockSituations);
+                                addMockSituationForObject(situationBuffer.get(nSituations - i), newObject, INTERMEDIATE_SITUATION, mockSituations);
                             }
                             if (mockSituations.size() == requiredBufferSize) {
                                 Idea candidateEpisode = new Idea("Episode", episodeCategoryIdea, "Episode", 1);
@@ -155,7 +165,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                 double dY = (double) objectPositions.get(0).get("Y").getValue()
                           - (double) objectPositions.get(1).get("Y").getValue();
 
-                if (dX > 1 || dY > 1) {
+                if (Math.abs(dX) > 1 || Math.abs(dY) > 1) {
                     return 1.0;
                 }
                 return 0;

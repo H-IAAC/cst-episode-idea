@@ -68,11 +68,11 @@ class Main {
             CommandUtility.sendRefuel(actor2.getIndex());
             CommandUtility.sendRefuel(agent.getIndex());
 
-            moveAndWaitArrive(actor1, 300, 300);
-            moveAndWaitArrive(actor1, 400, 100, true);
-            moveAndWaitArrive(actor1, 500, 300, true);
-            moveAndWaitArrive(actor1, 600, 100, true);
-            moveAndWaitArrive(actor1, 700, 300, true);
+            moveAndWaitArrive(actor1, 300, 300, true, 50);
+            moveAndWaitArrive(actor1, 400, 100, true, 50);
+            moveAndWaitArrive(actor1, 500, 300, true, 50);
+            moveAndWaitArrive(actor1, 600, 100, true, 50);
+            moveAndWaitArrive(actor1, 700, 300, true, 50);
 
 
         } catch (CommandExecException e) {
@@ -91,25 +91,25 @@ class Main {
     }
 
     private static void moveAndWaitArrive(Creature actor, int x, int y) throws CommandExecException {
-        moveAndWaitArrive(actor, x, y, false);
+        moveAndWaitArrive(actor, x, y, false, 15);
     }
 
-    private static void moveAndWaitArrive(Creature actor, int x, int y, boolean fastTurn) throws CommandExecException {
+    private static void moveAndWaitArrive(Creature actor, int x, int y, boolean fastTurn, int threshold) throws CommandExecException {
         double velocity = 2;
         if (fastTurn) {
-            // Hack to make agent turn fast
-            // Simulation will restrict linear velocity to 1,
+            // Hack to make agent turn fast.
+            // Simulation will restrict linear velocity to 2,
             // but keep angular velocity high
             velocity = 50;
         }
         actor.moveto(velocity, x, y);
         double cx = actor.getPosition().getX();
         double cy = actor.getPosition().getY();
-        while(Math.abs(cx - x) > 15 || Math.abs(cy - y) > 15){
+        while(Math.abs(cx - x) > threshold || Math.abs(cy - y) > threshold){
             actor.updateState();
             cx = actor.getPosition().getX();
             cy = actor.getPosition().getY();
-            sleepFor(100);
+            sleepFor(50);
         }
     }
 
