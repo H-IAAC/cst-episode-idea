@@ -18,7 +18,7 @@ import java.util.LinkedList;
 
 public class AgentMind extends Mind {
 
-    AgentMind(Creature agent) {
+    AgentMind(Creature agent, String episodeType) {
         super();
        
        
@@ -69,7 +69,7 @@ public class AgentMind extends Mind {
         situationSequencer.addOutput(perceptionBuffer);
         insertCodelet(situationSequencer);
 
-        Codelet simpleOEpisodeSegmentation = new SimpleOEpisodeSegmentation();
+        Codelet simpleOEpisodeSegmentation = new SimpleOEpisodeSegmentation(episodeType);
         simpleOEpisodeSegmentation.addInput(perceptionBuffer);
         simpleOEpisodeSegmentation.addInput(episodes);
         insertCodelet(simpleOEpisodeSegmentation);

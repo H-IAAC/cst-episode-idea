@@ -4,6 +4,7 @@ import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.representation.idea.Category;
 import br.unicamp.cst.representation.idea.Idea;
+import org.apache.commons.lang.NotImplementedException;
 
 import java.util.*;
 
@@ -12,7 +13,20 @@ public class SimpleOEpisodeSegmentation extends Codelet {
     private Memory perceptionBuffer;
     private Memory oEpisodes;
 
-    private Idea linearEpisodeCategory = constructLinearEpisodeCategory();
+    private Idea episodeCategoryIdea;
+
+    public SimpleOEpisodeSegmentation(String type){
+        switch (type){
+            case "generic":
+                episodeCategoryIdea = constructGenericEpisodeCategory();
+                break;
+            case "linear":
+                episodeCategoryIdea = constructLinearEpisodeCategory();
+                break;
+            default:
+                throw new NotImplementedException();
+        }
+    }
 
     @Override
     public void accessMemoryObjects() {
@@ -68,7 +82,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                                 mockEpisode.setL(episodeSeq);
 
                                 // Check if episode continues
-                                if (linearEpisodeCategory.membership(mockEpisode) > 0.5) {
+                                if (episodeCategoryIdea.membership(mockEpisode) > 0.5) {
                                     episodeSituations.add(mockSituation);
                                 } else {//TODO: should end episode otherwise?
                                     episodeSituations.getLast().setName("FinalSituation");
@@ -84,19 +98,21 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                 // Iterate over objects from first situation on buffer
                 LinkedList<Idea> situationBuffer = (LinkedList<Idea>) perceptionBuffer.getI();
                 int nSituations = situationBuffer.size();
-                if (nSituations >= 3) {
+                int requiredBufferSize = (int) episodeCategoryIdea.get("buffer_size").getValue();
+                if (nSituations >= requiredBufferSize) {
                     for (Idea object : situationBuffer.getFirst().getL()) {
                         // If object is not tracked, start tracking it if is an LinearEpisode
                         String newObject = object.getName();
                         if (!trackedObjectNames.contains(newObject)) {
                             LinkedList<Idea> mockSituations = new LinkedList<>();
-                            addMockSituationForObject(situationBuffer.get(nSituations - 3), newObject, "InitialSituation", mockSituations);
-                            addMockSituationForObject(situationBuffer.get(nSituations - 2), newObject, "IntermediarySituation", mockSituations);
-                            addMockSituationForObject(situationBuffer.get(nSituations - 1), newObject, "IntermediarySituation", mockSituations);
-                            if (mockSituations.size() == 3) {
-                                Idea candidateEpisode = new Idea("Episode", linearEpisodeCategory, "Episode", 1);
+                            addMockSituationForObject(situationBuffer.get(nSituations - requiredBufferSize), newObject, "InitialSituation", mockSituations);
+                            for (int i = requiredBufferSize-1; i > 0; i--){
+                                addMockSituationForObject(situationBuffer.get(nSituations - i), newObject, "IntermediarySituation", mockSituations);
+                            }
+                            if (mockSituations.size() == requiredBufferSize) {
+                                Idea candidateEpisode = new Idea("Episode", episodeCategoryIdea, "Episode", 1);
                                 candidateEpisode.setL(mockSituations);
-                                if (linearEpisodeCategory.membership(candidateEpisode) > 0.5) {
+                                if (episodeCategoryIdea.membership(candidateEpisode) > 0.5) {
                                     episodesList.add(candidateEpisode);
                                 }
                             }
@@ -115,6 +131,39 @@ public class SimpleOEpisodeSegmentation extends Codelet {
             mockSituation.add(objectState);
             mockSituations.add(mockSituation);
         }
+    }
+
+    private Idea constructGenericEpisodeCategory() {
+        Category genericEpisodeCategory = new Category() {
+            @Override
+            public Idea getInstance(Idea idea) {
+                //TODO
+                return null;
+            }
+
+            @Override
+            public double membership(Idea idea) {
+                // Get object positions from each situation
+                List<Idea> objectPositions = idea.getL().stream()
+                        .map(situation->situation.getL().get(0))
+                        .map(object->object.get("Position"))
+                        .toList();
+
+                // Check if positions changed
+                double dX = (double) objectPositions.get(0).get("X").getValue()
+                          - (double) objectPositions.get(1).get("X").getValue();
+                double dY = (double) objectPositions.get(0).get("Y").getValue()
+                          - (double) objectPositions.get(1).get("Y").getValue();
+
+                if (dX > 1 || dY > 1) {
+                    return 1.0;
+                }
+                return 0;
+            }
+        };
+        Idea episodeCategory = new Idea("GenericEpisode", genericEpisodeCategory);
+        episodeCategory.add(new Idea("buffer_size", 2));
+        return episodeCategory;
     }
 
     private Idea constructLinearEpisodeCategory() {
@@ -167,6 +216,8 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                 return dXA*dXB + dYA*dYB;
             }
         };
-        return new Idea("LinearEpisode", linearCategoryFunc);
+        Idea episodeCategory = new Idea("LinearEpisode", linearCategoryFunc);
+        episodeCategory.add(new Idea("buffer_size", 3));
+        return episodeCategory;
     }
 }

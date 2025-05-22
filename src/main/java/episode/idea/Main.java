@@ -16,21 +16,30 @@ class Main {
     static Environment env;
     static Creature agent = null;
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
+
+        String episodeCategoryType = "generic";
+        for (int i=0; i<args.length;i++){
+            if (args[i].equals("--linear-episode")){
+                episodeCategoryType = "linear";
+            }
+        }
 
         //----Environment Initialization
         env = initializeEnvironment();
         if (env == null) return;
-
-        //----Initialize main agent that will observe the scene
-        AgentMind mind = initializeAgentMind();
-        if (mind == null) return;
+        sleepFor(500);
 
         //----Initialize actors
         Creature actor1 = createActor(100, 200);
         if (actor1 == null) return;
         Creature actor2 = createActor(100, 100);
         if (actor2 == null) return;
+
+        //----Initialize main agent that will observe the scene
+        AgentMind mind = initializeAgentMind(episodeCategoryType);
+        if (mind == null) return;
+
 
         IdeaVisualizer visualizer = new IdeaVisualizer(mind);
         //visualizer.addMemoryWatch("Vision");
@@ -40,43 +49,63 @@ class Main {
         visualizer.addMemoryWatch("SimpleEpisodes");
         visualizer.setVisible(true);
 
-
-        sleepFor(1000);
         System.out.println("Moving Actors");
 
         try {
-            for (int i = 0; i<2; i++){
-                moveAndWaitArrive(actor1, 700, 200);
-                moveAndWaitArrive(actor2, 700, 100);
 
-                actor1.moveto(2, 100, 200);
-                moveAndWaitArrive(actor2, 100, 100);
+            moveAndWaitArrive(actor1, 700, 200);
+            moveAndWaitArrive(actor2, 700, 100);
 
-                actor1.moveto(2, 700, 100);
-                sleepFor(1000);
-                moveAndWaitArrive(actor2, 700, 200);
+            actor1.moveto(2, 100, 100);
+            sleepFor(1000);
+            moveAndWaitArrive(actor2, 100, 200);
 
-                actor1.moveto(2, 100, 200);
-                sleepFor(1000);
-                moveAndWaitArrive(actor2, 100, 100);
+            // We expect here 4 Episodes to be detected
+            // independent of the Episode Category selected
 
-                //--Refuel actors and main agent so it does not stop moving
-                CommandUtility.sendRefuel(actor1.getIndex());
-                CommandUtility.sendRefuel(actor2.getIndex());
-                CommandUtility.sendRefuel(agent.getIndex());
+            //--Refuel actors and main agent so it does not stop moving
+            CommandUtility.sendRefuel(actor1.getIndex());
+            CommandUtility.sendRefuel(actor2.getIndex());
+            CommandUtility.sendRefuel(agent.getIndex());
 
-                sleepFor(500);
-            }
+            moveAndWaitArrive(actor1, 300, 300);
+            moveAndWaitArrive(actor1, 400, 100, true);
+            moveAndWaitArrive(actor1, 500, 300, true);
+            moveAndWaitArrive(actor1, 600, 100, true);
+            moveAndWaitArrive(actor1, 700, 300, true);
+
+
         } catch (CommandExecException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private static void moveInCircle(Creature actor, int sx, int sy) throws CommandExecException {
+        moveAndWaitArrive(actor, sx, sy);
+        for (int i=0; i < 100; i++){
+            actor.move(2,-2,0);
+            sleepFor(10);
+            actor.move(2,2, 0);
+            sleepFor(10);
+        }
+    }
+
     private static void moveAndWaitArrive(Creature actor, int x, int y) throws CommandExecException {
-        actor.moveto(2, x, y);
+        moveAndWaitArrive(actor, x, y, false);
+    }
+
+    private static void moveAndWaitArrive(Creature actor, int x, int y, boolean fastTurn) throws CommandExecException {
+        double velocity = 2;
+        if (fastTurn) {
+            // Hack to make agent turn fast
+            // Simulation will restrict linear velocity to 1,
+            // but keep angular velocity high
+            velocity = 50;
+        }
+        actor.moveto(velocity, x, y);
         double cx = actor.getPosition().getX();
         double cy = actor.getPosition().getY();
-        while(Math.abs(cx - x) > 10 || Math.abs(cy - y) > 10){
+        while(Math.abs(cx - x) > 15 || Math.abs(cy - y) > 15){
             actor.updateState();
             cx = actor.getPosition().getX();
             cy = actor.getPosition().getY();
@@ -90,6 +119,7 @@ class Main {
         try {
             actor = env.createCreature(x, y, 0, ThingColor.RED);
             actor.start();
+            sleepFor(500);
         } catch (CommandExecException e) {
             logger.severe(String.format("Could not create actor creature at (%d, %d)", x, y));
             e.printStackTrace();
@@ -99,18 +129,19 @@ class Main {
     }
 
     @Nullable
-    private static AgentMind initializeAgentMind() {
+    private static AgentMind initializeAgentMind(String episodeType) {
         try {
             //                                             3 * PI / 2
             agent = env.createCreature(400, 450, 3*3.14/2.0);
             agent.start();
+            sleepFor(500);
         } catch (CommandExecException e) {
             logger.severe("Could not create main agent");
             e.printStackTrace();
             return null;
         }
 
-        return new AgentMind(agent);
+        return new AgentMind(agent, episodeType);
     }
 
     @Nullable
