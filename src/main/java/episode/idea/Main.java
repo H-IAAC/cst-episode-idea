@@ -68,11 +68,11 @@ class Main {
             CommandUtility.sendRefuel(actor2.getIndex());
             CommandUtility.sendRefuel(agent.getIndex());
 
-            moveAndWaitArrive(actor1, 300, 300, true, 50);
+            moveAndWaitArrive(actor1, 300, 350, true, 50);
             moveAndWaitArrive(actor1, 400, 100, true, 50);
-            moveAndWaitArrive(actor1, 500, 300, true, 50);
+            moveAndWaitArrive(actor1, 500, 350, true, 50);
             moveAndWaitArrive(actor1, 600, 100, true, 50);
-            moveAndWaitArrive(actor1, 700, 300, true, 50);
+            moveAndWaitArrive(actor1, 700, 350, true, 50);
 
 
         } catch (CommandExecException e) {

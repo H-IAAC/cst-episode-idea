@@ -46,6 +46,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
     @Override
     public void proc() {
         // Process simple o-episodes that are being tracked
+        //System.out.println("##################");
         synchronized (oEpisodes){
             ArrayList<Idea> episodesList = (ArrayList<Idea>) oEpisodes.getI();
             List<String> trackedObjectNames = new ArrayList<>();
@@ -69,35 +70,45 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                         // Get current situation
                         LinkedList<Idea> situationBuffer = (LinkedList<Idea>) perceptionBuffer.getI();
                         Idea situation = situationBuffer.getLast();
+                        //System.out.println(situation.getName());
+
+                        LinkedList<Idea> episodeSituations = (LinkedList<Idea>) episode.getL();
+                        int episodeLen = episodeSituations.size();
 
                         //Check if tracked object is part of situation
+                        // to determine if should continue episode or ended it.
+                        boolean isEpisodeStillHappening = false;
                         for (Idea object : situation.getL()) {
-                            if (object.getName().equals(trackedObjectName) && trackedObject.getId() != object.getId()) {
-                                //Construct test episode from last 3 situations to check against
-                                //episode category.
-                                LinkedList<Idea> episodeSituations = (LinkedList<Idea>) episode.getL();
-                                int episodeLen = episodeSituations.size();
-                                Idea mockSituation = new Idea(INTERMEDIATE_SITUATION, "");
-                                mockSituation.add(object);
+                            if (object.getName().equals(trackedObjectName)) {
+                                isEpisodeStillHappening = true;
+                                if (trackedObject.getId() != object.getId()) {
+                                    //Construct test episode from last 3 situations to check against
+                                    //episode category.
+                                    Idea mockSituation = new Idea(INTERMEDIATE_SITUATION, "");
+                                    mockSituation.add(object);
 
-                                LinkedList<Idea> episodeSeq = new LinkedList<>();
-                                int buffer_size = (int) episodeCategoryIdea.get("buffer_size").getValue();
-                                for (int i = buffer_size-1; i > 0; i--){
-                                    episodeSeq.add(episodeSituations.get(episodeLen - i));
-                                }
-                                episodeSeq.add(mockSituation);
+                                    LinkedList<Idea> episodeSeq = new LinkedList<>();
+                                    int buffer_size = (int) episodeCategoryIdea.get("buffer_size").getValue();
+                                    for (int i = buffer_size - 1; i > 0; i--) {
+                                        episodeSeq.add(episodeSituations.get(episodeLen - i));
+                                    }
+                                    episodeSeq.add(mockSituation);
 
-                                Idea mockEpisode = new Idea("Episode", "");
-                                mockEpisode.setL(episodeSeq);
+                                    Idea mockEpisode = new Idea("Episode", "");
+                                    mockEpisode.setL(episodeSeq);
 
-                                // Check if episode continues
-                                if (episodeCategoryIdea.membership(mockEpisode) > 0.5) {
-                                    episodeSituations.add(mockSituation);
-                                } else {//TODO: should end episode otherwise?
-                                    System.out.println(IdeaHelper.fullPrint(mockEpisode));
-                                    episodeSituations.getLast().setName(FINAL_SITUATION);
+                                    // Check if episode continues
+                                    if (episodeCategoryIdea.membership(mockEpisode) > 0.5) {
+                                        episodeSituations.remove(1); //Remove first Intermediate Situation
+                                        episodeSituations.add(mockSituation); // Add new Intermediate Situation
+                                    } else {
+                                        episodeSituations.getLast().setName(FINAL_SITUATION);
+                                    }
                                 }
                             }
+                        }
+                        if (! isEpisodeStillHappening){
+                            episodeSituations.getLast().setName(FINAL_SITUATION);
                         }
                     }
                 }
@@ -120,10 +131,14 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                                 addMockSituationForObject(situationBuffer.get(nSituations - i), newObject, INTERMEDIATE_SITUATION, mockSituations);
                             }
                             if (mockSituations.size() == requiredBufferSize) {
-                                Idea candidateEpisode = new Idea("Episode", episodeCategoryIdea, "Episode", 1);
-                                candidateEpisode.setL(mockSituations);
-                                if (episodeCategoryIdea.membership(candidateEpisode) > 0.5) {
-                                    episodesList.add(candidateEpisode);
+                                long countDifferentIds = mockSituations.stream().map(obj->obj.getId()).distinct().count();
+                                //Checks if object is duplicated between situations
+                                if (countDifferentIds == requiredBufferSize) {
+                                    Idea candidateEpisode = new Idea("Episode", episodeCategoryIdea, "Episode", 1);
+                                    candidateEpisode.setL(mockSituations);
+                                    if (episodeCategoryIdea.membership(candidateEpisode) > 0.5) {
+                                        episodesList.add(candidateEpisode);
+                                    }
                                 }
                             }
                         }
@@ -158,7 +173,6 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                         .map(situation->situation.getL().get(0))
                         .map(object->object.get("Position"))
                         .toList();
-
                 // Check if positions changed
                 double dX = (double) objectPositions.get(0).get("X").getValue()
                           - (double) objectPositions.get(1).get("X").getValue();
@@ -193,12 +207,18 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                         .toList();
 
                 // Check if positions follow linear path
+                if (idea.getL().get(0).getL().get(0).getName().contains("Creature")) {
+                    //System.out.printf("A: [%.1f, %.1f]\n", objectPositions.get(0).get("X").getValue(), objectPositions.get(0).get("Y").getValue());
+                    //System.out.printf("B: [%.1f, %.1f]\n", objectPositions.get(1).get("X").getValue(), objectPositions.get(1).get("Y").getValue());
+                    //System.out.printf("C: [%.1f, %.1f]\n", objectPositions.get(2).get("X").getValue(), objectPositions.get(2).get("Y").getValue());
+                }
                 double normA = getNorm(objectPositions.get(0), objectPositions.get(1));
                 double normB = getNorm(objectPositions.get(1), objectPositions.get(2));
                 double cos = (dotProduct(objectPositions)) / (normA * normB);
                 double angle = Math.abs(Math.acos(cos));
-                //System.out.printf("NormA: %.4f - NormB: %.2f - Angle: %.6f", normA, normB, angle);
-                if (normA > 1 && normB > 1 && angle < 0.02) {
+                //if (idea.getL().get(0).getL().get(0).getName().contains("Creature"))
+                    //System.out.printf("NormA: %.4f - NormB: %.2f - Angle: %.6f\n", normA, normB, angle);
+                if (normA > 1 && normB > 1 && angle < 0.05) {
                     return 1.0;
                 }
                 return 0;
