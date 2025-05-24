@@ -50,28 +50,24 @@ public class AgentMind extends Mind {
         Codelet sensoryCodelet = new SensoryCodelet(agent);
         sensoryCodelet.addOutput(vision);
         insertCodelet(sensoryCodelet);
-        sensoryCodelet.setTimeStep(150);
-       
+
         Codelet wallDetector = new EntityPerceptionCodelet("Wall", "Walls");
         wallDetector.addInput(vision);
         wallDetector.addInput(thingCategories);
         wallDetector.addOutput(walls);
         insertCodelet(wallDetector);
-        wallDetector.setTimeStep(150);
 
         Codelet creatureDetector = new EntityPerceptionCodelet("Creature", "Actors");
         creatureDetector.addInput(vision);
         creatureDetector.addInput(thingCategories);
         creatureDetector.addOutput(actors);
         insertCodelet(creatureDetector);
-        creatureDetector.setTimeStep(150);
 
         Codelet situationSequencer = new SituationSequencerCodelet();
         situationSequencer.addInput(walls);
         situationSequencer.addInput(actors);
         situationSequencer.addOutput(perceptionBuffer);
         insertCodelet(situationSequencer);
-        situationSequencer.setTimeStep(300);
 
         Codelet simpleOEpisodeSegmentation = new SimpleOEpisodeSegmentation(episodeType);
         simpleOEpisodeSegmentation.setPublishSubscribe(true);
@@ -79,9 +75,9 @@ public class AgentMind extends Mind {
         simpleOEpisodeSegmentation.addOutput(episodes);
         insertCodelet(simpleOEpisodeSegmentation);
 
-        //for (Codelet c : this.getCodeRack().getAllCodelets()) {
-        //    c.setTimeStep(200);
-        //}
+        for (Codelet c : this.getCodeRack().getAllCodelets()) {
+            c.setTimeStep(200);
+        }
         start();
     }
 

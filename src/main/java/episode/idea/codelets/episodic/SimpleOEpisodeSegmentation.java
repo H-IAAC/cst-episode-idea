@@ -46,7 +46,6 @@ public class SimpleOEpisodeSegmentation extends Codelet {
     @Override
     public void proc() {
         // Process simple o-episodes that are being tracked
-        //System.out.println("##################");
         synchronized (oEpisodes){
             ArrayList<Idea> episodesList = (ArrayList<Idea>) oEpisodes.getI();
             List<String> trackedObjectNames = new ArrayList<>();
@@ -70,7 +69,6 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                         // Get current situation
                         LinkedList<Idea> situationBuffer = (LinkedList<Idea>) perceptionBuffer.getI();
                         Idea situation = situationBuffer.getLast();
-                        //System.out.println(situation.getName());
 
                         LinkedList<Idea> episodeSituations = (LinkedList<Idea>) episode.getL();
                         int episodeLen = episodeSituations.size();
@@ -99,7 +97,9 @@ public class SimpleOEpisodeSegmentation extends Codelet {
 
                                     // Check if episode continues
                                     if (episodeCategoryIdea.membership(mockEpisode) > 0.5) {
-                                        episodeSituations.remove(1); //Remove first Intermediate Situation
+                                        //If Episode is of type process, records all Intermediate Situations
+                                        if (!episodeCategoryIdea.get("type").getValue().equals("process"))
+                                            episodeSituations.remove(1); //Remove first Intermediate Situation
                                         episodeSituations.add(mockSituation); // Add new Intermediate Situation
                                     } else {
                                         episodeSituations.getLast().setName(FINAL_SITUATION);
@@ -187,6 +187,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
         };
         Idea episodeCategory = new Idea("GenericEpisode", genericEpisodeCategory);
         episodeCategory.add(new Idea("buffer_size", 2));
+        episodeCategory.add(new Idea("type", "process"));
         return episodeCategory;
     }
 
@@ -207,17 +208,10 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                         .toList();
 
                 // Check if positions follow linear path
-                if (idea.getL().get(0).getL().get(0).getName().contains("Creature")) {
-                    //System.out.printf("A: [%.1f, %.1f]\n", objectPositions.get(0).get("X").getValue(), objectPositions.get(0).get("Y").getValue());
-                    //System.out.printf("B: [%.1f, %.1f]\n", objectPositions.get(1).get("X").getValue(), objectPositions.get(1).get("Y").getValue());
-                    //System.out.printf("C: [%.1f, %.1f]\n", objectPositions.get(2).get("X").getValue(), objectPositions.get(2).get("Y").getValue());
-                }
                 double normA = getNorm(objectPositions.get(0), objectPositions.get(1));
                 double normB = getNorm(objectPositions.get(1), objectPositions.get(2));
                 double cos = (dotProduct(objectPositions)) / (normA * normB);
                 double angle = Math.abs(Math.acos(cos));
-                //if (idea.getL().get(0).getL().get(0).getName().contains("Creature"))
-                    //System.out.printf("NormA: %.4f - NormB: %.2f - Angle: %.6f\n", normA, normB, angle);
                 if (normA > 1 && normB > 1 && angle < 0.05) {
                     return 1.0;
                 }
@@ -248,6 +242,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
         };
         Idea episodeCategory = new Idea("LinearEpisode", linearCategoryFunc);
         episodeCategory.add(new Idea("buffer_size", 3));
+        episodeCategory.add(new Idea("type", "function"));
         return episodeCategory;
     }
 }
