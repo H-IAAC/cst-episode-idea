@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -27,13 +28,16 @@ public class IdeaVisualizer extends JFrame {
     private IdeaPanel ideaPanel;
     private final Mind mind;
     private final Map<String, Integer> memoryLevels = new HashMap<>();
+    private final String printFolder;
 
     /**
      * Creates new form IdeaVisualizer
      */
-    public IdeaVisualizer(Mind mind) {
+    public IdeaVisualizer(Mind mind, String printFolderPrefix) {
         initComponents();
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.mind = mind;
+        printFolder = printFolderPrefix;
 
         ideaPanel = new IdeaPanel(new Idea("root", ""), false);
         //wmp.setOpaque(true); //content panes must be opaque
@@ -172,7 +176,9 @@ public class IdeaVisualizer extends JFrame {
     public void setIdea(Idea idea) {
         PrintWriter out;
         try {
-            out = new PrintWriter(idea.getName());
+            File printFile = new File("./ideas_out/" + printFolder);
+            printFile.mkdirs();
+            out = new PrintWriter(printFile + "/" + idea.getName());
             String csv = new Gson().toJson(idea);
             out.println(csv);
             out.close();
@@ -201,5 +207,11 @@ public class IdeaVisualizer extends JFrame {
 
     public void setMemoryWatchPrintLevel(String memoryName, int printLevel){
         memoryLevels.put(memoryName, printLevel);
+    }
+
+    public void printAllMemories(){
+        for (int i=0; i < jList1.getModel().getSize(); i++){
+            jList1.setSelectedIndex(i);
+        }
     }
 }

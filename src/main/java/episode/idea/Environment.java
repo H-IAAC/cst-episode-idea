@@ -34,9 +34,9 @@ public class Environment {
     public boolean initializeEnv(){
         boolean isAllWallsCreated = true;
         isAllWallsCreated &= insertWall(ThingColor.BLUE, 0,0,800,0);
-        isAllWallsCreated &= insertWall(ThingColor.BLUE, 0,0,0,500);
-        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,0,800,500);
-        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,500,0,500);
+        isAllWallsCreated &= insertWall(ThingColor.BLUE, 0,0,0,600);
+        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,0,800,600);
+        isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,600,0,600);
 
         isAllWallsCreated &= insertWall(ThingColor.GREEN, 375, 10, 425, 20);
         isAllWallsCreated &= insertWall(ThingColor.MAGENTA, 325, 10, 375, 20);
@@ -52,6 +52,14 @@ public class Environment {
         } catch (CommandExecException e) {
             logger.severe(String.format("Could not create WALL with color %s at (%.1f, %.1f) (%.1f, %.1f)", color.name(), x1, y1, x2, y2));
             return false;
+        }
+    }
+
+    public void shutdown() {
+        try {
+            world.reset();
+        } catch (CommandExecException e) {
+            Logger.getLogger(this.getClass().getName()).severe("Could not reset world");
         }
     }
 

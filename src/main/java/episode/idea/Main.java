@@ -19,9 +19,11 @@ class Main {
     public static void main(String... args) {
 
         String episodeCategoryType = "generic";
+        String printFolderPrefix = "generic";
         for (int i=0; i<args.length;i++){
             if (args[i].equals("--linear-episode")){
                 episodeCategoryType = "linear";
+                printFolderPrefix = "linear";
             }
         }
 
@@ -41,8 +43,7 @@ class Main {
         if (mind == null) return;
 
 
-        IdeaVisualizer visualizer = new IdeaVisualizer(mind);
-        //visualizer.addMemoryWatch("Vision");
+        IdeaVisualizer visualizer = new IdeaVisualizer(mind, printFolderPrefix);
         visualizer.addMemoryWatch("Walls");
         visualizer.addMemoryWatch("Actors");
         visualizer.addMemoryWatch("PerceptionBuffer");
@@ -52,15 +53,16 @@ class Main {
         System.out.println("Moving Actors");
 
         try {
-
+            //Make actors move in a straight line in Agent field of view(FOV)
             moveAndWaitArrive(actor1, 700, 200);
             moveAndWaitArrive(actor2, 700, 100);
 
+            //Make actors move in criss-cross paths in Agent FOV
             actor1.moveto(2, 100, 100);
             sleepFor(1000);
             moveAndWaitArrive(actor2, 100, 200);
 
-            // We expect here 4 Episodes to be detected
+            // At this point, we expect 4 Episodes to be detected
             // independent of the Episode Category selected
 
             //--Refuel actors and main agent so it does not stop moving
@@ -68,26 +70,26 @@ class Main {
             CommandUtility.sendRefuel(actor2.getIndex());
             CommandUtility.sendRefuel(agent.getIndex());
 
-            moveAndWaitArrive(actor1, 300, 350, true, 50);
-            moveAndWaitArrive(actor1, 400, 100, true, 50);
-            moveAndWaitArrive(actor1, 500, 350, true, 50);
-            moveAndWaitArrive(actor1, 600, 100, true, 50);
-            moveAndWaitArrive(actor1, 700, 350, true, 50);
+            //Make Actor1 do a Zig-Zag in front of agent
+            moveAndWaitArrive(actor1, 200, 100, true, 35);
+            moveAndWaitArrive(actor1, 300, 300, true, 35);
+            moveAndWaitArrive(actor1, 400, 100, true, 35);
+            moveAndWaitArrive(actor1, 500, 300, true, 35);
+            moveAndWaitArrive(actor1, 700, 100, true, 35);
 
 
         } catch (CommandExecException e) {
             throw new RuntimeException(e);
         }
-    }
 
-    private static void moveInCircle(Creature actor, int sx, int sy) throws CommandExecException {
-        moveAndWaitArrive(actor, sx, sy);
-        for (int i=0; i < 100; i++){
-            actor.move(2,-2,0);
-            sleepFor(10);
-            actor.move(2,2, 0);
-            sleepFor(10);
-        }
+        //Goes through all memories added to visualizer to print them to a file
+        visualizer.printAllMemories();
+
+        mind.shutDown();
+        env.shutdown();
+        visualizer.setVisible(false);
+        visualizer.dispose();
+        System.exit(0);
     }
 
     private static void moveAndWaitArrive(Creature actor, int x, int y) throws CommandExecException {
@@ -103,6 +105,7 @@ class Main {
             velocity = 50;
         }
         actor.moveto(velocity, x, y);
+        actor.updateState();
         double cx = actor.getPosition().getX();
         double cy = actor.getPosition().getY();
         while(Math.abs(cx - x) > threshold || Math.abs(cy - y) > threshold){
@@ -132,7 +135,7 @@ class Main {
     private static AgentMind initializeAgentMind(String episodeType) {
         try {
             //                                             3 * PI / 2
-            agent = env.createCreature(400, 450, 3*3.14/2.0);
+            agent = env.createCreature(400, 570, 3*3.14/2.0, ThingColor.GREEN);
             agent.start();
             sleepFor(500);
         } catch (CommandExecException e) {
