@@ -78,6 +78,8 @@ public class AgentMind extends Mind {
         for (Codelet c : this.getCodeRack().getAllCodelets()) {
             c.setTimeStep(200);
         }
+        situationSequencer.setTimeStep(250);
+        
         start();
     }
 
