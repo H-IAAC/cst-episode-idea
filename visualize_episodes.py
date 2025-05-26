@@ -1,11 +1,10 @@
-import math
 import argparse
 import json
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
+from matplotlib.lines import Line2D
 
-colors_1 = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99']
-colors_2 = ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#a65628','#f781bf','#999999']
+colors = ['#e41a1c','#377eb8']
 
 def get_pos(situation):
     for property in situation['l'][0]['l']:
@@ -18,7 +17,7 @@ def get_pos(situation):
             return float(x),float(y)
     return 0,0
 
-def visualize_episode(file_path, show_intermediate, colors):
+def visualize_episode(file_path, show_intermediate):
     fig, ax = plt.subplots(figsize=(10,10))
     ax.set_xlim([150,650])
     ax.set_ylim([50,600])
@@ -32,8 +31,21 @@ def visualize_episode(file_path, show_intermediate, colors):
     with open(file_path) as file:
         idea = json.load(file)
 
+    entity_map = {}
+    idx_count = 0
+
     idx_annotations = []
-    for i, episode in enumerate(idea['l']):
+    for episode in idea['l']:
+        object_name = episode['l'][0]['l'][0]['name']
+        if object_name not in entity_map:
+            entity_map[object_name] = {'idx': idx_count, 'count': 0, 'label': chr(idx_count + 65)} # ASCII code for 'A'==65
+            idx_count += 1
+        entity_map[object_name]['count'] += 1
+
+        episode_idx = entity_map[object_name]['idx']
+        episode_count = entity_map[object_name]['count']
+        episode_label = entity_map[object_name]['label']
+
         if show_intermediate:
             px, py = None, None
             for situation in episode['l']:
@@ -43,12 +55,14 @@ def visualize_episode(file_path, show_intermediate, colors):
                                 xytext=(px,py),
                                 arrowprops=dict(
                                     arrowstyle="->",
-                                    color=colors[i % len(colors)],
+                                    color=colors[episode_idx % len(colors)],
                                     linewidth=2,
                                 ))
-                px, py = x, y
                 if "Final" in situation['name']:
-                    idx_annotations.append((str(i+1), (x,y)))
+                    vx, vy = x-px, y-py
+                    idx_annotations.append((str(episode_count) + episode_label, (x - 5*vx, y - 5*vy + 10)))
+
+                px, py = x, y
         else:
             initial_sit, final_sit = None, None
             for situation in episode['l']:
@@ -60,19 +74,25 @@ def visualize_episode(file_path, show_intermediate, colors):
             if initial_sit and final_sit:
                 x1, y1 = get_pos(initial_sit)
                 x2, y2 = get_pos(final_sit)
+
                 ax.annotate("",
                             xy=(x2,y2),
                             xytext=(x1,y1),
                             arrowprops=dict(
                                 arrowstyle="->",
-                                color=colors[i % len(colors)],
+                                color=colors[episode_idx % len(colors)],
                                 linewidth=2,
                             ))
-                idx_annotations.append((str(i+1), (x2,y2)))
+
+                vx, vy = x2-x1, y2-y1
+                idx_annotations.append((str(episode_count) + episode_label, (x2 - 0.25*vx,y2 - 0.25*vy + 10)))
 
     for idx, pos in idx_annotations:
-        ax.annotate(idx, xy=pos, fontsize=12, fontweight='bold')
+        ax.annotate(idx, xy=pos, fontsize=13, fontweight='bold')
 
+    mock_handles = [Line2D([0], [0], color=colors[0], lw=4),
+                    Line2D([0], [0], color=colors[1], lw=4)]
+    ax.legend(mock_handles, ['Actor A', 'Actor B'], markerscale=3.0, fontsize=15)
     plt.show()
     return fig
 
@@ -85,6 +105,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    fig = visualize_episode(args.file_path, args.show_intermediate, colors_2)
+    fig = visualize_episode(args.file_path, args.show_intermediate)
     if args.output:
         fig.savefig(args.output, bbox_inches='tight')
