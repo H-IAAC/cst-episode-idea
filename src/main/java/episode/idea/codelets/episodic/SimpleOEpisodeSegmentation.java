@@ -82,7 +82,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                                 if (trackedObject.getId() != object.getId()) {
                                     //Construct test episode from last 3 situations to check against
                                     //episode category.
-                                    Idea mockSituation = new Idea(INTERMEDIATE_SITUATION, "");
+                                    Idea mockSituation = new Idea(INTERMEDIATE_SITUATION, "", "TimeStep", 1);
                                     mockSituation.add(object);
 
                                     LinkedList<Idea> episodeSeq = new LinkedList<>();
@@ -92,7 +92,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                                     }
                                     episodeSeq.add(mockSituation);
 
-                                    Idea mockEpisode = new Idea("Episode", "");
+                                    Idea mockEpisode = new Idea("Episode", "", "Episode", 1);
                                     mockEpisode.setL(episodeSeq);
 
                                     // Check if episode continues
@@ -152,7 +152,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
     private static void addMockSituationForObject(Idea situation, String newObject, String situationName, LinkedList<Idea> mockSituations) {
         Idea objectState = situation.get(newObject);
         if (objectState != null){
-            Idea mockSituation = new Idea(situationName, "");
+            Idea mockSituation = new Idea(situationName, "", "TimeStep", 1);
             mockSituation.add(objectState);
             mockSituations.add(mockSituation);
         }
@@ -185,7 +185,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                 return 0;
             }
         };
-        Idea episodeCategory = new Idea("GenericEpisode", genericEpisodeCategory);
+        Idea episodeCategory = new Idea("GenericEpisode", genericEpisodeCategory, "Episode", 2);
         episodeCategory.add(new Idea("buffer_size", 2));
         episodeCategory.add(new Idea("type", "process"));
         return episodeCategory;
@@ -240,7 +240,7 @@ public class SimpleOEpisodeSegmentation extends Codelet {
                 return dXA*dXB + dYA*dYB;
             }
         };
-        Idea episodeCategory = new Idea("LinearEpisode", linearCategoryFunc);
+        Idea episodeCategory = new Idea("LinearEpisode", linearCategoryFunc, "Episode", 2);
         episodeCategory.add(new Idea("buffer_size", 3));
         episodeCategory.add(new Idea("type", "function"));
         return episodeCategory;
