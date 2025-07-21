@@ -27,7 +27,6 @@ public class IdeaVisualizer extends JFrame {
 
     private IdeaPanel ideaPanel;
     private final Mind mind;
-    private final Map<String, Integer> memoryLevels = new HashMap<>();
     private final String printFolder;
 
     /**
@@ -132,22 +131,21 @@ public class IdeaVisualizer extends JFrame {
                     }
                     content = allContent;
                 } else if (content instanceof Idea) {
-                    setIdea(new Gson().fromJson(IdeaHelper.csvPrint((Idea) content, memoryLevels.getOrDefault(memoryName,5)), Idea.class));
-                    //setIdea(new Gson().fromJson(IdeaHelper.csvPrint((Idea) content, memoryLevels.getOrDefault(memoryName, 5)), Idea.class));
+                    setIdea(new Gson().fromJson(IdeaHelper.jsonPrint((Idea) content, false), Idea.class));
                 } else if (content instanceof ArrayList) {
                     Idea show = new Idea(memoryName, "");
                     ArrayList<Idea> listContent = (ArrayList<Idea>) content;
                     if (!listContent.isEmpty()) {
                         show.setL(listContent);
                     }
-                    setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, 5), Idea.class));
+                    setIdea(new Gson().fromJson(IdeaHelper.jsonPrint(show, false), Idea.class));
                 } else if (content instanceof LinkedList) {
                     Idea show = new Idea(memoryName, "");
                     LinkedList<Idea> listContent = (LinkedList<Idea>) content;
                     if (!listContent.isEmpty()) {
                         show.getL().addAll(listContent);
                     }
-                    setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, 5), Idea.class));
+                    setIdea(new Gson().fromJson(IdeaHelper.jsonPrint(show, false), Idea.class));
                 } else if (content instanceof Map){
                     Map<String, List<Idea>> internal = (Map<String, List<Idea>>) content;
                     Idea show = new Idea(memoryName, "");
@@ -156,7 +154,7 @@ public class IdeaVisualizer extends JFrame {
                         obj.setL(entry.getValue());
                         show.add(obj);
                     }
-                    setIdea(new Gson().fromJson(IdeaHelper.csvPrint(show, memoryLevels.getOrDefault(memoryName,5)), Idea.class));
+                    setIdea(new Gson().fromJson(IdeaHelper.jsonPrint(show, false), Idea.class));
                 } else {
                     Logger.getLogger(IdeaVisualizer.class.getName()).severe(String.format("Visualization for class %s not implemented\n", content.getClass().getName()));
                 }
@@ -179,8 +177,8 @@ public class IdeaVisualizer extends JFrame {
             File printFile = new File("./ideas_out/" + printFolder);
             printFile.mkdirs();
             out = new PrintWriter(printFile + "/" + idea.getName());
-            String csv = new Gson().toJson(idea);
-            out.println(csv);
+            String json = IdeaHelper.jsonPrint(idea, false);
+            out.println(json);
             out.close();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -197,16 +195,7 @@ public class IdeaVisualizer extends JFrame {
     }
 
     public void addMemoryWatch(String memoryName){
-        addMemoryWatch(memoryName, 10);
-    }
-
-    public void addMemoryWatch(String memoryName, int printLevel) {
         list1Model.addElement(memoryName);
-        memoryLevels.put(memoryName, printLevel);
-    }
-
-    public void setMemoryWatchPrintLevel(String memoryName, int printLevel){
-        memoryLevels.put(memoryName, printLevel);
     }
 
     public void printAllMemories(){

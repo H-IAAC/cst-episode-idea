@@ -38,10 +38,6 @@ public class Environment {
         isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,0,800,600);
         isAllWallsCreated &= insertWall(ThingColor.BLUE, 800,600,0,600);
 
-        isAllWallsCreated &= insertWall(ThingColor.GREEN, 375, 10, 425, 20);
-        isAllWallsCreated &= insertWall(ThingColor.MAGENTA, 325, 10, 375, 20);
-        isAllWallsCreated &= insertWall(ThingColor.YELLOW, 425, 10, 475, 20);
-
         return isAllWallsCreated;
     }
 

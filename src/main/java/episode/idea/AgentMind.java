@@ -79,7 +79,7 @@ public class AgentMind extends Mind {
             c.setTimeStep(200);
         }
         situationSequencer.setTimeStep(250);
-        
+
         start();
     }
 
@@ -115,7 +115,6 @@ public class AgentMind extends Mind {
                 Object value = idea.getValue();
                 if (value instanceof Thing) {
                     Thing thing = (Thing) value;
-                    //System.out.printf("TESTING IF ACTOR - CATEGORY: %d - NAME: %s\n", thing.getCategory(), thing.getName());
                     if (thing.getCategory() == 0) return 1.0;
                 }
                 return 0;

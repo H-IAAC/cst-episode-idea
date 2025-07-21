@@ -1,3 +1,4 @@
+import math
 import argparse
 import json
 import matplotlib.pyplot as plt
@@ -17,10 +18,12 @@ def get_pos(situation):
             return float(x),float(y)
     return 0,0
 
-def visualize_episode(file_path, show_intermediate):
+def visualize_episode(file_path, show_intermediate, label_offset):
     fig, ax = plt.subplots(figsize=(10,10))
     ax.set_xlim([150,650])
     ax.set_ylim([50,600])
+    ax.set_xlabel('X', fontsize=14, fontweight='bold')
+    ax.set_ylabel('Y', fontsize=14, fontweight='bold')
     ax.tick_params(axis='both', which='major', labelsize=13)
 
     agent_shape = [[380, 590], [420,590], [400,590-34]]
@@ -60,7 +63,9 @@ def visualize_episode(file_path, show_intermediate):
                                 ))
                 if "Final" in situation['name']:
                     vx, vy = x-px, y-py
-                    idx_annotations.append((str(episode_count) + episode_label, (x - 5*vx, y - 5*vy + 10)))
+                    ang = math.atan(vy/vx) * 180 / math.pi
+                    ang = ang - 180 if ang > 90 and ang < 270 else ang
+                    idx_annotations.append((str(episode_count) + episode_label, (x - label_offset*vx, y - label_offset*vy), ang))
 
                 px, py = x, y
         else:
@@ -85,10 +90,12 @@ def visualize_episode(file_path, show_intermediate):
                             ))
 
                 vx, vy = x2-x1, y2-y1
-                idx_annotations.append((str(episode_count) + episode_label, (x2 - 0.25*vx,y2 - 0.25*vy + 10)))
+                ang = math.atan(vy/vx) * 180 / math.pi
+                ang = ang - 180 if ang > 90 and ang < 270 else ang
+                idx_annotations.append((str(episode_count) + episode_label, (x2 - label_offset*vx,y2 - label_offset*vy), ang))
 
-    for idx, pos in idx_annotations:
-        ax.annotate(idx, xy=pos, fontsize=13, fontweight='bold')
+    for idx, pos, ang in idx_annotations:
+        ax.annotate(idx, xy=pos, fontsize=13, fontweight='bold', rotation=ang)
 
     mock_handles = [Line2D([0], [0], color=colors[0], lw=4),
                     Line2D([0], [0], color=colors[1], lw=4)]
@@ -102,9 +109,10 @@ if __name__ == "__main__":
     parser.add_argument('file_path')
     parser.add_argument('--show-intermediate' , '-si', action='store_true')
     parser.add_argument('--output', '-o')
+    parser.add_argument('--label-offset', '-off', type=float)
 
     args = parser.parse_args()
 
-    fig = visualize_episode(args.file_path, args.show_intermediate)
+    fig = visualize_episode(args.file_path, args.show_intermediate, args.label_offset)
     if args.output:
         fig.savefig(args.output, bbox_inches='tight')

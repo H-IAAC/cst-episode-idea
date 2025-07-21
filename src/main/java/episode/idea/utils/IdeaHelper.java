@@ -11,18 +11,22 @@ public class IdeaHelper {
 
     public static String fullPrint(Idea idea){
         listtoavoidloops = new ArrayList<>();
-        return fullPrint(idea, "");
+        return fullPrint(idea, true);
     }
 
-    private static String fullPrint(Idea idea, String pre){
+    public static String fullPrint(Idea idea, boolean avoidDuplicates){
+        return fullPrint(idea, "", avoidDuplicates);
+    }
+
+    private static String fullPrint(Idea idea, String pre, boolean avoidDuplicates){
         if (idea == null)
             return pre + "NULL\n";
         String ideaString = idea.toString() + "[" + printValue(idea) + "]";
         StringBuilder out = new StringBuilder(pre + typeScopeString(idea) + ideaString + "\n");
-        if (!listtoavoidloops.contains(idea.getId())) {
-            listtoavoidloops.add(idea.getId());
+        if (!listtoavoidloops.contains(idea.getId()) | !avoidDuplicates) {
+            if (avoidDuplicates) listtoavoidloops.add(idea.getId());
             for (Idea l : idea.getL()) {
-                out.append(fullPrint(l, pre + "  "));
+                out.append(fullPrint(l, pre + "  ", avoidDuplicates));
             }
         }
         return out.toString();
@@ -71,45 +75,45 @@ public class IdeaHelper {
         };
     }
 
-    public static String csvPrint(Idea idea){
+    public static String jsonPrint(Idea idea, boolean avoidDuplicates){
         listtoavoidloops = new ArrayList<>();
         maxLevel = 10;
-        return csvPrint(idea, "", listtoavoidloops, 0);
+        return jsonPrint(idea, "", listtoavoidloops, 0, avoidDuplicates);
     }
 
-    public static String csvPrint(Idea idea, int maxLevel_){
+    public static String jsonPrint(Idea idea, int maxLevel_){
         listtoavoidloops = new ArrayList<>();
         maxLevel = maxLevel_;
-        return csvPrint(idea, "", listtoavoidloops, 0);
+        return jsonPrint(idea, "", listtoavoidloops, 0, true);
     }
 
-    public static String csvPrint(Idea idea, String prefix, List<Object> listtoavoidloops, int currLevel){
+    public static String jsonPrint(Idea idea, String prefix, List<Object> listtoavoidloops, int currLevel, boolean avoidDuplicates){
         if (idea == null)
             return "{\"id\": 0, \"name\": \"NULL\", \"value\": \"NULL\", \"l\": [], \"type\": 1,\"category\": \"Property\", \"scope\": 0}";
-        String csv = prefix + "{\n";
-        csv += prefix + "  \"id\": " + idea.getId() + ",\n";
-        csv += prefix + "  \"name\": \"" + idea.getName() + "\",\n";
-        csv += prefix + "  \"value\": \"" + (idea.getValue() != null ? getIdeaResumedValue(idea):"") + "\",\n";
+        String json = prefix + "{\n";
+        json += prefix + "  \"id\": " + idea.getId() + ",\n";
+        json += prefix + "  \"name\": \"" + idea.getName() + "\",\n";
+        json += prefix + "  \"value\": \"" + (idea.getValue() != null ? getIdeaResumedValue(idea):"") + "\",\n";
         StringBuilder lCsv = new StringBuilder();
-        if (!listtoavoidloops.contains(idea) && currLevel < maxLevel) {
-            listtoavoidloops.add(idea);
+        if ((!listtoavoidloops.contains(idea) || !avoidDuplicates) && currLevel < maxLevel) {
+            if (avoidDuplicates) listtoavoidloops.add(idea);
             for (Idea l : idea.getL()) {
-                lCsv.append("\n").append(csvPrint(l, prefix + "    ", listtoavoidloops, currLevel+1)).append(",");
+                lCsv.append("\n").append(jsonPrint(l, prefix + "    ", listtoavoidloops, currLevel+1, avoidDuplicates)).append(",");
             }
             if (!idea.getL().isEmpty()) {
                 lCsv.deleteCharAt(lCsv.length() - 1);
-                csv += prefix + "  \"l\": [" + lCsv + "\n" + prefix + "  ],\n";
+                json += prefix + "  \"l\": [" + lCsv + "\n" + prefix + "  ],\n";
             } else {
-                csv += prefix + "  \"l\": [],\n";
+                json += prefix + "  \"l\": [],\n";
             }
         } else {
-            csv += prefix + "  \"l\": [],\n";
+            json += prefix + "  \"l\": [],\n";
         }
-        csv += prefix + "  \"type\": " + idea.getType() + ",\n";
-        csv += prefix + "  \"category\": \"" + idea.getCategory() + "\",\n";
-        csv += prefix + "  \"scope\": " + idea.getScope() + "\n";
-        csv += prefix + "}";
-        return csv;
+        json += prefix + "  \"type\": " + idea.getType() + ",\n";
+        json += prefix + "  \"category\": \"" + idea.getCategory() + "\",\n";
+        json += prefix + "  \"scope\": " + idea.getScope() + "\n";
+        json += prefix + "}";
+        return json;
     }
 
     public static Idea searchIdea(Idea idea, String name){
