@@ -6,6 +6,7 @@ published at "2025 Annual International Conference on Biologically Inspired Cogn
 This project was developed as part of the Cognitive Architectures research line from
 the Hub for Artificial Intelligence and Cognitive Architectures (H.IAAC) of the State University of Campinas (UNICAMP).
 See more projects from the group [here](https://hiaac.unicamp.br/en/).
+
 ---
 ## Abstract
 The choice of knowledge representation varies among different cognitive architectures. The agent's experience of Existence is defined by what the knowledge representation can and cannot represent from its observation. In this work, we define a representation of episodes that enable cognitive architectures to accumulate experiences. We describe how Existence may be fragmented in space and time to achieve a core knowledge representation format. This is used to construct Episode Ideas as a form of encoding the agent's experience of Existence. We demonstrate through experiments the use and versatility of the representation, as well as how semantic knowledge defined by our knowledge representation may affect how the agent experiences the environment.
