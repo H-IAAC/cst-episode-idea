@@ -80,8 +80,18 @@ In a separated terminal window, execute the CST agent by running:
 
 ## Citation
 
+<!--CITATION START-->
+```bibtext
+@software{my_citation,
+author = {G. Silva, Bruno and Camargo, Eduardo and R. Gudwin, Ricardo},
+title = {Representing Episodes: Space-Time Experiences for Cognitive Architectures},
+url = {https://github.com/H-IAAC/cst-episode-idea}
+}
+```
+<!--CITATION END-->
+
 ```bibitex
-@inproceedings{10.1007/978-3-031-50381-8_81,
+@inproceedings{silva_b_episodes,
     author="Silva, Bruno G. and Camargo, Eduardo and da Silva Sim{\~o}es, Alexandre
     and Colombini, Esther Luna and Costa, Paula Dornhofer Paro and Gudwin, Ricardo Ribeiro",
     title="Representing Episodes: Space-Time Experiences for Cognitive Architectures",
