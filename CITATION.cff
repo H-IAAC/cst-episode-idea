@@ -1,0 +1,49 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Representing Episodes: Space-Time Experiences for
+  Cognitive Architectures
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Bruno
+    family-names: G. Silva
+    email: b203657@dac.unicamp.br
+    affiliation: FEEC-UNICAMP
+    orcid: 'https://orcid.org/0009-0000-5244-8403'
+  - given-names: Eduardo
+    family-names: Camargo
+    affiliation: FEEC-UNICAMP
+    orcid: 'https://orcid.org/0000-0002-8941-8408'
+  - given-names: Ricardo
+    family-names: R. Gudwin
+    affiliation: FEEC-UNICAMP
+    orcid: 'https://orcid.org/0000-0002-9666-3954'
+    email: gudwin@unicamp.br
+repository-code: 'https://github.com/H-IAAC/cst-episode-idea'
+abstract: >-
+  The choice of knowledge representation varies among
+  different cognitive architectures. The agent's experience
+  of Existence is defined by what the knowledge
+  representation can and cannot represent from its
+  observation. In this work, we define a representation of
+  episodes that enable cognitive architectures to accumulate
+  experiences. We describe how Existence may be fragmented
+  in space and time to achieve a core knowledge
+  representation format. This is used to construct Episode
+  Ideas as a form of encoding the agent's experience of
+  Existence. We demonstrate through experiments the use and
+  versatility of the representation, as well as how semantic
+  knowledge defined by our knowledge representation may
+  affect how the agent experiences the environment.
+keywords:
+  - knowledge representation
+  - cognitive architectures
+  - exprience
+  - episodes
+license: LGPL-3.0
+commit: 7a1d2061ff5f4382c5997197b04d92c68c300434
